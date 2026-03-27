@@ -1,5 +1,11 @@
 # megumi
 
+[![PyPI version](https://img.shields.io/pypi/v/megumi.svg)](https://pypi.org/project/megumi/)
+[![Python versions](https://img.shields.io/pypi/pyversions/megumi.svg)](https://pypi.org/project/megumi/)
+[![CI](https://github.com/Eligoze75/megumi/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Eligoze75/megumi/actions/workflows/ci-cd.yml)
+[![codecov](https://codecov.io/gh/Eligoze75/megumi/branch/master/graph/badge.svg)](https://codecov.io/gh/Eligoze75/megumi)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **megumi** is a Python package for feature selection in machine learning workflows.
 
 Inspired by *Jujutsu Kaisen's* Megumi Fushiguro, this package helps you to work strategically: not about using every feature available, but about choosing the right ones.
