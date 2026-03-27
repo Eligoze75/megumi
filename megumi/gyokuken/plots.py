@@ -27,82 +27,36 @@ def plot_bivariate(
     ax=None,
 ):
     """
-    Plot mean target rate per feature bucket alongside observation counts.
+    Plot mean target rate per feature bucket with observation counts.
 
-    For continuous features the column is split into quantile bins using
-    :func:`~megumi.gyokuken.visualization_utils.bin_continuous_feature`.
-    For categorical or low-cardinality discrete features, rare labels are
-    grouped into ``"Other"`` via
-    :func:`~megumi.gyokuken.visualization_utils.rare_label_encoder`.
-
-    The left y-axis shows the mean value of ``target`` per bucket (line),
-    together with the overall population mean as a dashed reference line.
-    The right y-axis shows the count of observations per bucket (bars).
+    Left axis: mean ``target`` per bucket (line) + population mean reference.
+    Right axis: observation count per bucket (bars). Continuous features are
+    quantile-binned; categoricals have rare labels grouped into ``"Other"``.
+    Missing values get their own bucket. Raises ``ValueError`` for multiclass
+    targets; emits a warning for continuous targets.
 
     Parameters
     ----------
     df : pd.DataFrame
-        DataFrame containing both ``feature`` and ``target`` columns.
     feature : str
-        Name of the feature column to analyse.
     target : str
-        Name of the target column. Must not be a multiclass target.
+        Binary or continuous target column.
     n_bins : int, optional
-        Number of quantile bins for continuous features. Default is 5.
+        Quantile bins for continuous features. Default is 5.
     rare_threshold : float, optional
-        Minimum relative frequency before a category label is grouped
-        into ``"Other"``. Applies only to categorical features.
+        Frequency below which a category is grouped into ``"Other"``.
         Default is 0.05.
     bar_color : str, optional
-        Colour of the count bars. Default is ``"#CCCCCC"``.
+        Default is ``"#CCCCCC"``.
     line_color : str, optional
-        Colour of the mean-target line and left y-axis. Default is
-        ``"#0066FF"``.
+        Default is ``"#0066FF"``.
     figsize : tuple of float, optional
-        Figure size ``(width, height)`` in inches. Default is ``(12, 5)``.
+        Default is ``(10, 7)``.
     ax : matplotlib.axes.Axes or None, optional
-        Axes to draw on. If ``None`` a new figure is created. A twin
-        x-axis is always created internally, so the returned tuple
-        always contains two axes objects regardless.
 
     Returns
     -------
-    fig : matplotlib.figure.Figure
-    ax_mean : matplotlib.axes.Axes
-        Left y-axis (mean target per bucket).
-    ax_count : matplotlib.axes.Axes
-        Right y-axis (observation counts per bucket).
-
-    Raises
-    ------
-    ValueError
-        If ``target`` is a multiclass variable. Bivariate analysis
-        requires a numeric target (binary or continuous) to compute
-        meaningful per-bucket means.
-
-    Notes
-    -----
-    Missing values in ``feature`` are never silently dropped. Instead
-    they form their own ``"Missing"`` bucket appended after all regular
-    bins, rendered in a visually distinct colour. This allows the caller
-    to inspect whether missingness is informative with respect to the
-    target.
-
-    For regression targets a warning is emitted as a reminder that the
-    right-axis values represent mean target magnitude rather than an
-    event rate, so cross-bucket differences carry a different meaning
-    than in the binary case.
-
-    Examples
-    --------
-    >>> import pandas as pd
-    >>> import numpy as np
-    >>> rng = np.random.default_rng(0)
-    >>> df = pd.DataFrame({
-    ...     "age": rng.integers(18, 70, 500),
-    ...     "default": rng.integers(0, 2, 500),
-    ... })
-    >>> fig, ax_mean, ax_count = plot_bivariate(df, feature="age", target="default")
+    fig, ax_mean, ax_count
     """
     target_type = infer_target_type(df[target])
 
@@ -239,58 +193,30 @@ def plot_distribution(
     ax=None,
 ):
     """
-    Plot the distribution of a feature grouped by the target variable.
+    Plot feature distribution grouped by target.
 
-    Supports four plot types controlled by ``kind``. The target is
-    automatically handled according to its inferred type (binary,
-    multiclass, or continuous):
-
-    - ``'binary'`` / ``'multiclass'`` — target values are used directly
-      as group labels.
-    - ``'continuous'`` — the target is binned into ``n_target_bins``
-      quantile groups before colouring.
+    Supports ``histogram``, ``kde``, ``violin``, and ``boxplot``. Binary and
+    multiclass targets are used as group labels directly; continuous targets
+    are quantile-binned before colouring. Raises ``ValueError`` for unknown
+    ``kind`` values.
 
     Parameters
     ----------
     df : pd.DataFrame
-        DataFrame containing both ``feature`` and ``target`` columns.
     feature : str
-        Name of the feature column whose distribution is plotted.
     target : str
-        Name of the target column used for grouping.
     kind : {'histogram', 'kde', 'violin', 'boxplot'}, optional
-        Type of distribution plot. Default is ``'histogram'``.
+        Default is ``'histogram'``.
     n_target_bins : int, optional
-        Number of quantile bins used when ``target`` is continuous.
-        Default is 4.
+        Quantile bins when target is continuous. Default is 4.
     figsize : tuple of float, optional
-        Figure size ``(width, height)`` in inches. Default is ``(10, 5)``.
+        Default is ``(10, 5)``.
     palette : str or sequence, optional
-        Seaborn/matplotlib colour palette. If ``None`` the seaborn
-        default is used.
     ax : matplotlib.axes.Axes or None, optional
-        Axes to draw on. If ``None`` a new figure is created.
 
     Returns
     -------
-    fig : matplotlib.figure.Figure
-    ax : matplotlib.axes.Axes
-
-    Raises
-    ------
-    ValueError
-        If ``kind`` is not one of the supported plot types.
-
-    Examples
-    --------
-    >>> import pandas as pd
-    >>> import numpy as np
-    >>> rng = np.random.default_rng(0)
-    >>> df = pd.DataFrame({
-    ...     "income": rng.normal(50_000, 15_000, 300),
-    ...     "default": rng.integers(0, 2, 300),
-    ... })
-    >>> fig, ax = plot_distribution(df, feature="income", target="default")
+    fig, ax
     """
     _VALID_KINDS = {"histogram", "kde", "violin", "boxplot"}
     if kind not in _VALID_KINDS:
@@ -395,52 +321,28 @@ def plot_correlation(
     """
     Plot a lower-triangle correlation heatmap for numeric features.
 
-    Computes pairwise correlations among ``features`` (or all numeric
-    columns) and renders an annotated seaborn heatmap. The upper triangle
-    is masked to avoid redundancy.
+    Upper triangle is masked to avoid redundancy. When ``features`` is
+    ``None``, all numeric columns are used and ``target`` is excluded
+    automatically. Raises ``ValueError`` if ``target`` is multiclass.
 
     Parameters
     ----------
     df : pd.DataFrame
-        DataFrame whose numeric columns are correlated.
     features : list of str or None, optional
-        Subset of column names to include. If ``None`` all numeric
-        columns in ``df`` are used. Default is ``None``.
+        Columns to include. Default is ``None`` (all numeric columns).
     target : str or None, optional
-        Name of the target column. If provided and the target is
-        multiclass, a ``ValueError`` is raised. When ``features`` is
-        ``None`` the target column is automatically excluded from the
-        correlation matrix. Default is ``None``.
+        Excluded from the matrix when ``features`` is ``None``.
     method : {'pearson', 'spearman', 'kendall'}, optional
-        Correlation coefficient to compute. Default is ``'pearson'``.
+        Default is ``'pearson'``.
     palette : str, optional
-        Matplotlib colormap name for the heatmap. Default is
-        ``'Wistia'``.
+        Default is ``'Wistia'``.
     figsize : tuple of float or None, optional
-        Figure size ``(width, height)`` in inches. If ``None`` the size
-        is derived automatically from the number of features.
+        Auto-sized from feature count if ``None``.
     ax : matplotlib.axes.Axes or None, optional
-        Axes to draw on. If ``None`` a new figure is created.
 
     Returns
     -------
-    fig : matplotlib.figure.Figure
-    ax : matplotlib.axes.Axes
-
-    Raises
-    ------
-    ValueError
-        If ``target`` is provided and is a multiclass variable.
-        Pairwise linear correlation is not meaningful when the target
-        has more than two unordered classes.
-
-    Examples
-    --------
-    >>> import pandas as pd
-    >>> import numpy as np
-    >>> rng = np.random.default_rng(0)
-    >>> df = pd.DataFrame(rng.standard_normal((100, 4)), columns=list("ABCD"))
-    >>> fig, ax = plot_correlation(df)
+    fig, ax
     """
     if target is not None:
         target_type = infer_target_type(df[target])
@@ -506,41 +408,23 @@ def plot_missing(
     ax=None,
 ):
     """
-    Plot the percentage of missing values per feature as a horizontal bar chart.
+    Plot missing value percentages per feature as a horizontal bar chart.
 
-    Only features with at least one missing value are shown. Bars are
-    sorted in descending order of missingness so the most problematic
-    features appear at the top.
+    Only features with at least one missing value are shown, sorted by
+    severity. Returns ``None, None`` silently if no missingness is found.
 
     Parameters
     ----------
     df : pd.DataFrame
-        DataFrame to inspect for missing values.
     features : list of str or None, optional
-        Subset of column names to inspect. If ``None`` all columns in
-        ``df`` are used. Default is ``None``.
+        Columns to inspect. Default is ``None`` (all columns).
     figsize : tuple of float or None, optional
-        Figure size ``(width, height)`` in inches. If ``None`` the
-        height is derived from the number of features with missing values.
+        Auto-sized from feature count if ``None``.
     ax : matplotlib.axes.Axes or None, optional
-        Axes to draw on. If ``None`` a new figure is created.
 
     Returns
     -------
-    fig : matplotlib.figure.Figure or None
-        ``None`` if no missing values are found.
-    ax : matplotlib.axes.Axes or None
-        ``None`` if no missing values are found.
-
-    Examples
-    --------
-    >>> import pandas as pd
-    >>> df = pd.DataFrame({
-    ...     "a": [1, None, 3, None, 5],
-    ...     "b": [None, 2, 3, 4, 5],
-    ...     "c": [1, 2, 3, 4, 5],
-    ... })
-    >>> fig, ax = plot_missing(df)
+    fig, ax — both ``None`` if no missing values are found.
     """
     data = df if features is None else df[features]
 
