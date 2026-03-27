@@ -10,9 +10,9 @@ Inspired by *Jujutsu Kaisen's* Megumi Fushiguro, this package helps you to work 
 
 Feature selection is one of the most impactful steps in building a machine learning model, and also one of the easiest to rush. `megumi` gives you the tools to do it properly, across three areas:
 
-**1. Visual exploration:** Understand your features before modelling. See how each feature relates to the target, spot distributions that separate classes, catch missing value patterns, and identify multicollinearity — all in a single function call.
+**1. Visual exploration:** Understand your features before modelling. See how each feature relates to the target, spot distributions that separate classes, catch missing value patterns, and identify multicollinearity, all in a single function call.
 
-**2. Importance scoring:** *(coming soon)* Go beyond intuition. Use machine learning-based methods to quantify which features actually carry predictive power.
+**2. Importance scoring:** Go beyond intuition. Use machine learning-based methods to quantify which features actually carry predictive power.
 
 **3. Contribution analysis:** *(coming soon)* Understand what each feature adds to your model and whether keeping it improves performance in practice.
 
@@ -20,7 +20,7 @@ Feature selection is one of the most impactful steps in building a machine learn
 
 ## Modules
 
-### `gyokuken` — Visual feature analysis
+### `gyokuken` - Visual feature analysis
 
 Named after Megumi's shikigami *gyokuken* (玉犬, the Divine Dogs), used for tracking and sensing. This module helps you track and sense the true nature of your features.
 
@@ -28,7 +28,7 @@ Named after Megumi's shikigami *gyokuken* (玉犬, the Divine Dogs), used for tr
 |---|---|
 | `plot_bivariate` | Mean target rate per feature bucket vs. observation counts. Adapts automatically to continuous and categorical features. Missing values get their own bucket. |
 | `plot_distribution` | Feature distribution grouped by target. Supports histogram, KDE, violin, and boxplot. |
-| `plot_correlation` | Lower-triangle correlation heatmap. Supports Pearson, Spearman, and Kendall. |
+| `plot_correlation` | Lower triangle correlation heatmap. Supports Pearson, Spearman, and Kendall. |
 | `plot_missing` | Horizontal bar chart of missing value percentages, sorted by severity. |
 
 Usage example:
@@ -43,6 +43,43 @@ plot_missing(df)
 ```
 
 All visualisations adapt to the target type automatically: binary classification, multiclass classification, or regression.
+
+### `bansho`: SHAP-based feature importance scoring
+
+Named after Megumi's shikigami *Banshō* (万象, Max Elephant) (a heavy, water releasing shikigami). This module uses machine learning and SHAP values to reveal which features carry real predictive power.
+
+Two synthetic random features (`RANDOM_1`, `RANDOM_2`) are introduced as baselines before fitting a vanilla machine learning model. Every input feature is ranked by its mean absolute SHAP value and labelled in relation to those baselines:
+
+| Label | Meaning |
+|---|---|
+| `predictive` | Mean \|SHAP\| beats both random features - a genuinely informative feature. |
+| `marginal` | Mean \|SHAP\| beats one random feature - weak signal, use with caution. |
+| `noise` | Mean \|SHAP\| beats neither random feature - no detectable predictive power. |
+
+| Function | Description |
+|---|---|
+| `score_features` | Fit a vanilla model, compute SHAP values, and return a ranked DataFrame of features labelled by predictive power. |
+
+Usage example:
+
+```python
+from sklearn.model_selection import train_test_split
+from megumi.bansho import score_features
+
+df_train, df_val = train_test_split(df, test_size=0.2, random_state=42)
+
+result = score_features(df_train, features=["age", "income", "zip"], target="default",
+                        df_val=df_val, random_state=42)
+# returns:
+#      feature predictive_power
+# 0     income       predictive
+# 1        age         marginal
+# 2        zip            noise
+```
+
+Passing `df_val` is recommended: the forest is fitted on the training set and SHAP values are computed on the held-out set, producing more conservative importance estimates. If omitted, SHAP is computed on the training set directly.
+
+Supports binary classification and regression targets. The `strategy` parameter is reserved for future model types (e.g. `"linear"`); currently only `"tree"` (random forest) is available.
 
 ---
 
@@ -63,7 +100,7 @@ conda activate megumi-dev
 
 ## Status
 
-`megumi` is under active development. The `gyokuken` visual module is the first of several planned modules. Contributions and feedback are welcome.
+`megumi` is under active development. Two modules are available: `gyokuken` for visual feature exploration and `bansho` for SHAP-based importance scoring. A third module for contribution analysis is planned. Contributions and feedback are welcome.
 
 ---
 
