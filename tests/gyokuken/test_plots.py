@@ -4,8 +4,6 @@ import matplotlib
 import numpy as np
 import pandas as pd
 import pytest
-
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from megumi.gyokuken import (
     plot_bivariate,
@@ -14,6 +12,8 @@ from megumi.gyokuken import (
     plot_missing,
 )
 
+
+matplotlib.use("Agg")
 
 # ---------------------------------------------------------------------------
 # Fixtures

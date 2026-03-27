@@ -2,8 +2,6 @@
 
 import numpy as np
 import pandas as pd
-import pytest
-
 from megumi.gyokuken.visualization_utils import (
     bin_continuous_feature,
     infer_feature_type,

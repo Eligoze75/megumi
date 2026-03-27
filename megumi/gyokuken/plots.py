@@ -306,7 +306,6 @@ def plot_distribution(
 
     fig.tight_layout()
     plt.show()
-    
 
 
 def plot_correlation(
@@ -398,7 +397,6 @@ def plot_correlation(
 
     fig.tight_layout()
     plt.show()
-    
 
 
 def plot_missing(
@@ -472,4 +470,3 @@ def plot_missing(
 
     fig.tight_layout()
     plt.show()
-    
