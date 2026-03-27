@@ -5,10 +5,26 @@ build-backend = "hatchling.build"
 [project]
 name = "megumi"
 version = "0.1.0"
-description = "A feature selection toolkit for ML practitioners — visualize relationships, rank feature importance, and understand model contributions. Choose wisely."
+description = "A feature selection toolkit for ML practitioners: visualize relationships, rank feature importance, and understand feature contributions. Choose wisely."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
+authors = [
+    { name = "Eli Gonzalez" },
+]
+keywords = ["feature selection", "machine learning", "shap", "visualization", "exploratory data analysis", "python"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Operating System :: OS Independent",
+]
 dependencies = [
     "numpy>=1.24",
     "pandas>=1.5",
@@ -18,9 +34,17 @@ dependencies = [
     "shap>=0.44",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Eligoze75/megumi"
+LinkedIn = "https://www.linkedin.com/in/el%C3%AD-gonz%C3%A1lez-zequeida/"
+Medium = "https://medium.com/@eligoze75"
+"Bug Tracker" = "https://github.com/Eligoze75/megumi/issues"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
+    "flake8>=6.0",
+    "pytest-cov>=4.0",
 ]
 
 [tool.hatch.build.targets.wheel]
