@@ -131,7 +131,7 @@ def evaluate_contribution(
     y = df[target]
     n_metrics = len(resolved_metrics)
     base_scores = np.zeros((n_metrics, n_splits))
-    aug_scores  = np.zeros((n_metrics, n_splits))
+    aug_scores = np.zeros((n_metrics, n_splits))
     null_scores = np.zeros((n_metrics, n_splits))
 
     for fold_idx, (train_idx, test_idx) in enumerate(
@@ -151,13 +151,21 @@ def evaluate_contribution(
             _build_model(task, n_estimators, fold_seed, max_features),
             df.iloc[train_idx][base_features],
             df.iloc[test_idx][base_features],
-            y_train, y_test, resolved_metrics, df_fold, task,
+            y_train,
+            y_test,
+            resolved_metrics,
+            df_fold,
+            task,
         )
         aug_scores[:, fold_idx] = _score_fold(
             _build_model(task, n_estimators, fold_seed, max_features),
             df.iloc[train_idx][all_features],
             df.iloc[test_idx][all_features],
-            y_train, y_test, resolved_metrics, df_fold, task,
+            y_train,
+            y_test,
+            resolved_metrics,
+            df_fold,
+            task,
         )
 
         # Null model: same feature count as augmented but new features are
@@ -177,10 +185,18 @@ def evaluate_contribution(
             _build_model(task, n_estimators, fold_seed, max_features),
             df_null.iloc[train_idx][all_features],
             df_null.iloc[test_idx][all_features],
-            y_train, y_test, resolved_metrics, df_fold, task,
+            y_train,
+            y_test,
+            resolved_metrics,
+            df_fold,
+            task,
         )
 
     return _build_results_df(
-        metric_names, base_scores, aug_scores, null_scores,
-        significance_level, higher_is_better,
+        metric_names,
+        base_scores,
+        aug_scores,
+        null_scores,
+        significance_level,
+        higher_is_better,
     )
