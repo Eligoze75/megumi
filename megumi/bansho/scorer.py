@@ -92,8 +92,12 @@ def score_features(
     X_train = _add_random_features(df[features].copy(), random_state=random_state)
     all_features = list(X_train.columns)
 
+    # Derive a separate seed for the validation random features so they are
+    # independent from the training ones. Using the same seed would make the
+    # first n_val rows of val's RANDOM_* columns identical to those in training.
+    val_random_state = None if random_state is None else random_state + 1
     X_val = (
-        _add_random_features(df_val[features].copy(), random_state=random_state)
+        _add_random_features(df_val[features].copy(), random_state=val_random_state)
         if df_val is not None
         else X_train
     )

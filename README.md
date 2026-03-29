@@ -20,7 +20,7 @@ Feature selection is one of the most impactful steps in building a machine learn
 
 **2. Importance scoring:** Go beyond intuition. Use machine learning-based methods to quantify which features actually carry predictive power.
 
-**3. Contribution analysis:** *(coming soon)* Understand what each feature adds to your model and whether keeping it improves performance in practice.
+**3. Contribution analysis:** Quantify how much a set of new features improves your model. Test candidate features against your current ones across any metric, including custom business metrics, and get statistical significance out of the box.
 
 ---
 
@@ -89,6 +89,58 @@ Supports binary classification and regression targets. The `strategy` parameter 
 
 ---
 
+### `nue`: Feature contribution analysis
+
+Named after Megumi's shikigami *Nue* (鵺), a chimeric creature used to survey and strike from above. This module answers the question: *"If I add these features, how much improvement do I get?"*
+
+Three random forests are fitted per cross-validation fold: one on the base features alone, one on base + candidate features (real values), and one on base + candidate features with the new columns row-permuted (the null model). Significance is measured by a paired t-test between the real augmented model and the null model, which isolates genuine signal from the Random Forest diversification effect that can inflate performance even when adding pure noise to a fixed `max_features` budget. Both sklearn metrics and udf callables are supported, including business metrics that depend on extra columns in the dataset.
+
+| Function | Description |
+|---|---|
+| `evaluate_contribution` | Compare model metrics before and after adding candidate features and report whether the improvement is statistically significant. |
+
+**Built-in metrics:** `"roc_auc"`, `"recall"`, `"precision"`, `"f1"`, `"accuracy"` (classification); `"rmse"`, `"mae"`, `"r2"` (regression).
+
+Usage example:
+
+```python
+from megumi.nue import evaluate_contribution
+
+result = evaluate_contribution(
+    df,
+    base_features=["age", "income", "credit_score"],
+    new_features=["vendor_A", "vendor_B"],
+    target="default",
+    metrics=["roc_auc", "recall"],
+    random_state=42,
+)
+# returns:
+#     metric  base_score  augmented_score   delta  pct_change  p_value  significant
+# 0  roc_auc      0.7421           0.8103  0.0682        9.19     0.003         True
+# 1   recall      0.6830           0.7512  0.0682        9.98     0.021         True
+```
+
+Custom metric callables that accept a third argument receive the full test-fold DataFrame, enabling business metrics such as expected loss:
+
+```python
+def loss_avoided(y_true, y_pred_proba, df_fold, threshold=0.5):
+    flagged = y_pred_proba >= threshold
+    return df_fold.loc[y_true.astype(bool) & ~flagged, "loan_amount"].sum()
+
+result = evaluate_contribution(
+    df,
+    base_features=["age", "income"],
+    new_features=["vendor_score"],
+    target="default",
+    metrics=[loss_avoided],
+    random_state=42,
+)
+```
+
+Supports binary classification and regression targets.
+
+---
+
 ## Installation
 
 ```bash
@@ -106,7 +158,7 @@ conda activate megumi-dev
 
 ## Status
 
-`megumi` is under active development. Two modules are available: `gyokuken` for visual feature exploration and `bansho` for SHAP-based importance scoring. A third module for contribution analysis is planned. Contributions and feedback are welcome.
+`megumi` is under active development. All three modules are available: `gyokuken` for visual feature exploration, `bansho` for SHAP-based importance scoring, and `nue` for feature contribution analysis. Contributions and feedback are welcome.
 
 ---
 
