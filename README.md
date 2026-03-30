@@ -1,6 +1,6 @@
 # megumi
 
-![Megumi Icon](img/Megumi_Icon.png)
+![Megumi Icon](https://raw.githubusercontent.com/Eligoze75/megumi/blob/master/img/Megumi_Icon.png)
 
 [![PyPI version](https://img.shields.io/pypi/v/megumi.svg)](https://pypi.org/project/megumi/)
 [![Python versions](https://img.shields.io/pypi/pyversions/megumi.svg)](https://pypi.org/project/megumi/)
