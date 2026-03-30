@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "megumi"
-version = "0.1.0"
+version = "0.1.1"
 description = "A feature selection toolkit for ML practitioners: visualize relationships, rank feature importance, and understand feature contributions. Choose wisely."
 readme = "README.md"
 license = { file = "LICENSE" }

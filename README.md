@@ -1,9 +1,11 @@
 # megumi
 
+![Megumi Icon](img/Megumi_Icon.png)
+
 [![PyPI version](https://img.shields.io/pypi/v/megumi.svg)](https://pypi.org/project/megumi/)
 [![Python versions](https://img.shields.io/pypi/pyversions/megumi.svg)](https://pypi.org/project/megumi/)
 [![CI](https://github.com/Eligoze75/megumi/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Eligoze75/megumi/actions/workflows/ci-cd.yml)
-[![codecov](https://codecov.io/gh/Eligoze75/megumi/branch/master/graph/badge.svg)](https://codecov.io/gh/Eligoze75/megumi)
+[![codecov](https://codecov.io/gh/Eligoze75/megumi/graph/badge.svg?token=YLFIHMRBVI)](https://codecov.io/gh/Eligoze75/megumi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **megumi** is a Python package for feature selection in machine learning workflows.
@@ -50,7 +52,7 @@ plot_missing(df)
 
 All visualisations adapt to the target type automatically: binary classification, multiclass classification, or regression.
 
-### `bansho`: SHAP-based feature importance scoring
+### `bansho` - SHAP-based feature importance scoring
 
 Named after Megumi's shikigami *Banshō* (万象, Max Elephant) (a heavy, water releasing shikigami). This module uses machine learning and SHAP values to reveal which features carry real predictive power.
 
@@ -89,7 +91,7 @@ Supports binary classification and regression targets. The `strategy` parameter 
 
 ---
 
-### `nue`: Feature contribution analysis
+### `nue` - Feature contribution analysis
 
 Named after Megumi's shikigami *Nue* (鵺), a chimeric creature used to survey and strike from above. This module answers the question: *"If I add these features, how much improvement do I get?"*
 
